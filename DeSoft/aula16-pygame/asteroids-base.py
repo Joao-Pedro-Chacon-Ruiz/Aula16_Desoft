@@ -3,6 +3,7 @@
 # Importando as bibliotecas necessárias.
 import pygame
 from os import path
+import random
 
 # Estabelece a pasta que contem as figuras.
 img_dir = path.join(path.dirname(__file__), 'img')
@@ -59,6 +60,28 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+class Mob(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        mob_img = pygame.image.load(path.join(img_dir, "meteorBrown_med1.png")).convert()
+        self.image = mob_img
+        self.rect = self.image.get_rect()
+        self.rect.centerx = random.randrange(0,WIDTH)
+        self.rect.bottom = random.randrange(-100,-40)
+        self.speedx = random.randrange(-3,3)
+        self.speedy = random.randrange(2,9)
+        
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+        self.image.set_colorkey(BLACK)
+        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100,-40)
+            self.speedx = random.randrange(-3,3)
+            self.speedy = random.randrange(2,9)
+        
+        
 # Inicialização do Pygame.
 pygame.init()
 pygame.mixer.init()
@@ -68,6 +91,9 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Nome do jogo
 pygame.display.set_caption("Asteroids")
+
+#Variável para o ajuste de velocidade
+clock = pygame.time.Clock()
 
 # Carrega o fundo do jogo
 background = pygame.image.load(path.join(img_dir, 'starfield.png')).convert()
@@ -80,6 +106,11 @@ player = Player()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
+i=0
+while i < 8:
+    mob = Mob()
+    all_sprites.add(mob)
+    i+=1
 
 # Comando para evitar travamentos.
 try:
@@ -87,6 +118,9 @@ try:
     # Loop principal.
     running = True
     while running:
+        
+        #Ajusta a velocidade do jogo
+        clock.tick(FPS)
         
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
@@ -99,9 +133,9 @@ try:
             if event.type == pygame.KEYDOWN:
                 #dependendo da tecla, altera a velocidade
                 if event.key == pygame.K_LEFT:
-                    player.speedx = -8
+                    player.speedx += -8
                 if event.key == pygame.K_RIGHT:
-                    player.speedx = 8
+                    player.speedx += 8
                     
             #Verifica se soltou alguma tecla
             if event.type == pygame.KEYUP:
