@@ -71,10 +71,11 @@ class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         mob_img = pygame.image.load(path.join(img_dir, "meteorBrown_med1.png")).convert()
-        self.image = mob_img
+        self.image = pygame.transform.scale(mob_img, (50,38))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.centerx = random.randrange(0,WIDTH)
-        self.rect.bottom = random.randrange(-100,-40)
+        self.rect.x = random.randrange(WIDTH - self.react.width)
+        self.rect.y = random.randrange(-100,-40)
         self.speedx = random.randrange(-3,3)
         self.speedy = random.randrange(2,9)
         
@@ -121,10 +122,14 @@ player = Player()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
+# Cria um grupo só dos meteoros
+mobs = pygame.sprite.Group()
+
 i=0
 while i < 8:
-    mobs = Mob()
-    all_sprites.add(mobs)
+    m = Mob()
+    all_sprites.add(m)
+    mobs.add(m)
     i+=1
 
 # Comando para evitar travamentos.
@@ -149,9 +154,9 @@ try:
             if event.type == pygame.KEYDOWN:
                 #dependendo da tecla, altera a velocidade
                 if event.key == pygame.K_LEFT:
-                    player.speedx += -8
+                    player.speedx = -8
                 if event.key == pygame.K_RIGHT:
-                    player.speedx += 8
+                    player.speedx = 8
                     
             #Verifica se soltou alguma tecla
             if event.type == pygame.KEYUP:
@@ -166,7 +171,7 @@ try:
         all_sprites.update()
         
         #Verifica se houve colisão entre nave e meteoro
-        hits = pygame.sprite.spritecollide(player, Mob(), False, pygame.sprite.collide_circle)
+        hits = pygame.sprite.spritecollide(player, mobs, False, pygame.sprite.collide_circle)
         if hits:
             #Toca o som da colisão
             boom_sound.play()
